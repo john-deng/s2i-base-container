@@ -1,5 +1,5 @@
 # This image is the base image for all s2i configurable container images.
-FROM centos:7
+FROM alpine:3.6
 
 ENV SUMMARY="Base image which allows using of source-to-image."	\
     DESCRIPTION="The s2i-core image provides any images layered on top of it \
@@ -13,10 +13,10 @@ LABEL summary="$SUMMARY" \
       io.openshift.s2i.scripts-url=image:///usr/libexec/s2i \
       io.s2i.scripts-url=image:///usr/libexec/s2i \
       com.redhat.component="s2i-core-docker" \
-      name="centos/s2i-core-centos7" \
-      version="1" \
+      name="hidevopsio/s2i-core-alpine" \
+      version="3.6" \
       release="1" \
-      maintainer="SoftwareCollections.org <sclorg@redhat.com>"
+      maintainer="John Deng <john.deng@outlook.com>"
 
 ENV \
     # DEPRECATED: Use above LABEL instead, because this will be removed in future versions.
@@ -41,33 +41,24 @@ ENV BASH_ENV=${APP_ROOT}/etc/scl_enable \
 # Also setup the 'openshift' user that is used for the build execution and for the
 # application runtime execution.
 # TODO: Use better UID and GID values
-RUN rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
-  INSTALL_PKGS="bsdtar \
-  findutils \
-  gettext \
-  groff \
-  scl-utils \
-  tar \
-  unzip \
-  yum-utils" && \
+RUN apk update && apk upgrade && \
+  INSTALL_PKGS="gettext groff bash" && \
   mkdir -p ${HOME}/.pki/nssdb && \
   chown -R 1001:0 ${HOME}/.pki && \
-  yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS && \
-  rpm -V $INSTALL_PKGS && \
-  yum clean all -y
+  apk add $INSTALL_PKGS
 
 # Copy extra files to the image.
 COPY ./root/ /
 
 # Directory with the sources is set as the working directory so all STI scripts
 # can execute relative to this path.
+
+# Reset permissions of modified directories and add default user
+RUN mkdir -p ${HOME} && \
+  adduser -u 1001 -S -G root -D 1001 -h ${HOME} -s /sbin/nologin && \
+  chown -R 1001:root ${APP_ROOT}
+
 WORKDIR ${HOME}
 
 ENTRYPOINT ["container-entrypoint"]
 CMD ["base-usage"]
-
-# Reset permissions of modified directories and add default user
-RUN rpm-file-permissions && \
-  useradd -u 1001 -r -g 0 -d ${HOME} -s /sbin/nologin \
-      -c "Default Application User" default && \
-  chown -R 1001:0 ${APP_ROOT}
