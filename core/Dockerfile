@@ -15,7 +15,7 @@ LABEL summary="$SUMMARY" \
       com.redhat.component="s2i-core-docker" \
       name="hidevopsio/s2i-core-alpine" \
       version="3.6" \
-      release="1" \
+      release="1.0" \
       maintainer="John Deng <john.deng@outlook.com>"
 
 ENV \
@@ -41,6 +41,8 @@ ENV BASH_ENV=${APP_ROOT}/etc/scl_enable \
 # Also setup the 'openshift' user that is used for the build execution and for the
 # application runtime execution.
 # TODO: Use better UID and GID values
+# Network Security Services (NSS) is a set of libraries designed to support cross-platform development of security-enabled client and server applications.
+
 RUN apk update && apk upgrade && \
   INSTALL_PKGS="gettext groff bash" && \
   mkdir -p ${HOME}/.pki/nssdb && \
@@ -55,8 +57,8 @@ COPY ./root/ /
 
 # Reset permissions of modified directories and add default user
 RUN mkdir -p ${HOME} && \
-  adduser -u 1001 -S -G root -D 1001 -h ${HOME} -s /sbin/nologin && \
-  chown -R 1001:root ${APP_ROOT}
+    adduser -u 1001 -S -G root -g 0 -D -h ${HOME} -s /sbin/nologin sti && \
+    chown -R 1001:0 ${APP_ROOT}
 
 WORKDIR ${HOME}
 

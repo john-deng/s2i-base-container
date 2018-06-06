@@ -1,5 +1,5 @@
 # This image is the base image for all OpenShift v3 language container images.
-FROM hidevopsio/s2i-core-alpine
+FROM docker.io/hidevopsio/s2i-core-alpine
 
 ENV SUMMARY="Base image with essential libraries and tools used as a base for \
 builder images like perl, python, ruby, etc." \
@@ -14,8 +14,8 @@ LABEL summary="$SUMMARY" \
       io.k8s.display-name="s2i base" \
       com.redhat.component="s2i-base-docker" \
       name="hidevopsio/s2i-base-alpine" \
-      version="1" \
-      release="1" \
+      version="1.0" \
+      release="1.0" \
       maintainer="John Deng <john.deng@outlook.com>"
 
 # This is the list of basic dependencies that all language container image can
@@ -33,6 +33,7 @@ RUN INSTALL_PKGS="autoconf \
   procps \
   wget \
   curl \
+  iputils \
   libcurl \
   libxml2-dev \
   libxslt-dev \
